@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const multer = require('multer');
+const multer = require('multer'); // to file uploads
 const path = require('path');
 
 const mongoDbConnect = require('./db/mongoDbConnect');
@@ -36,8 +36,8 @@ app.use('/auth', authRoutes);
 //Global error handling
 app.use((error, req, res, next) => {
     console.log(error);
-    const { statusCode, message } = error || 500;
-    res.status(statusCode).json({ message });
+    const { statusCode, message, data } = error || 500;
+    res.status(statusCode).json({ message, data });
 });
 
 mongoose
