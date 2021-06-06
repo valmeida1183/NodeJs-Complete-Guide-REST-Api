@@ -7,8 +7,9 @@ const mongoDbConnect = require('./db/mongoDbConnect');
 const { fileStorage, fileFilter } = require('./middlewares/fileStorage.middleware');
 
 // Routes
-const feedRoutes = require('./routes/feed.route');
 const authRoutes = require('./routes/auth.route');
+const feedRoutes = require('./routes/feed.route');
+const userRoutes = require('./routes/user.route');
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use('/feed', feedRoutes);
 app.use('/auth', authRoutes);
+app.use('/user', userRoutes);
 
 //Global error handling
 app.use((error, req, res, next) => {
