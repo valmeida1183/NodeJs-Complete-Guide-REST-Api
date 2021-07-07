@@ -4,6 +4,7 @@ const Post = require('../models/post');
 const User = require('../models/user');
 const errorHelper = require('../utils/error.helper');
 const fileHelper = require('../utils/file.helper');
+const socketHelper = require('../utils/socket.helper');
 
 const getPosts = async (req, res, next) => {
     const currentPage = req.query.page || 1;
@@ -13,6 +14,7 @@ const getPosts = async (req, res, next) => {
         const totalItems = await Post.find().countDocuments();
         const posts = await Post.find()
             .populate('creator')
+            .sort({ createdAt: -1 })
             .skip((currentPage - 1) * perPage)
             .limit(perPage);
 
@@ -64,6 +66,10 @@ const createPost = async (req, res, next) => {
         user.posts.push(post);
         await user.save();
 
+        socketHelper
+            .getIo()
+            .emit('posts', { action: 'create', post: { ...post._doc, creator: { _id: req.userId, name: user.name } } });
+
         res.status(201).json({
             message: 'Post created successfuly!',
             post: post,
@@ -92,12 +98,12 @@ const updatePost = async (req, res, next) => {
     }
 
     try {
-        const post = await Post.findById(id);
+        const post = await Post.findById(id).populate('creator');
         if (!post) {
             errorHelper.throwError('Cannot find a post', 404);
         }
 
-        if (post.creator.toString() !== req.userId) {
+        if (post.creator._id.toString() !== req.userId) {
             errorHelper.throwError('Not authorized.', 403);
         }
 
@@ -110,6 +116,9 @@ const updatePost = async (req, res, next) => {
         post.imageUrl = imageUrl;
 
         const updatedPost = await post.save();
+
+        socketHelper.getIo().emit('posts', { action: 'update', post: updatedPost });
+
         res.status(200).json({ message: 'Post updated', post: updatedPost });
     } catch (error) {
         errorHelper.handleError(error, next);
@@ -135,6 +144,8 @@ const deletePost = async (req, res, next) => {
         const user = await User.findById(req.userId);
         user.posts.pull(id);
         await user.save();
+
+        socketHelper.getIo().emit('posts', { action: 'delete', post: id });
 
         res.status(200).json({ message: 'Post deleted' });
     } catch (error) {

@@ -1,10 +1,13 @@
 const express = require('express');
+const { Server } = require('socket.io');
 const mongoose = require('mongoose');
 const multer = require('multer'); // to file uploads
 const path = require('path');
 
 const mongoDbConnect = require('./db/mongoDbConnect');
 const { fileStorage, fileFilter } = require('./middlewares/fileStorage.middleware');
+
+const socketHelper = require('./utils/socket.helper');
 
 // Routes
 const authRoutes = require('./routes/auth.route');
@@ -45,7 +48,13 @@ app.use((error, req, res, next) => {
 mongoose
     .connect(mongoDbConnect.dbUrl, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
-        app.listen(8000);
+        const server = app.listen(8000);
+        const io = socketHelper.init(server);
+
+        io.on('connection', socket => {
+            console.log('\x1b[34m', '--------- Client is Connected!!! ---------');
+            console.log('\x1b[0m');
+        });
         console.log(
             '\x1b[32m', // set green color
             '--------- Application is Running!!! ---------'
