@@ -64,7 +64,7 @@ const createPost = async (req, res, next) => {
 
         const user = await User.findById(req.userId);
         user.posts.push(post);
-        await user.save();
+        const savedUser = await user.save();
 
         socketHelper
             .getIo()
@@ -75,8 +75,10 @@ const createPost = async (req, res, next) => {
             post: post,
             creator: { _id: user._id, name: user.name },
         });
+
+        return savedUser;
     } catch (error) {
-        errorHelper.handleError(error, next);
+        return errorHelper.handleError(error, next);
     }
 };
 

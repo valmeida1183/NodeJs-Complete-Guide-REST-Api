@@ -4,6 +4,7 @@ dotenv.config();
 let _db;
 
 const mongoAtlasDbUrl = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.gmc3b.mongodb.net/messages?retryWrites=true&w=majority`;
+const mongoAtlasTestDbUrl = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.gmc3b.mongodb.net/test-messages?retryWrites=true&w=majority`;
 
 const getDb = () => {
     if (_db) {
@@ -13,5 +14,8 @@ const getDb = () => {
     throw 'No database found!';
 };
 
-exports.dbUrl = mongoAtlasDbUrl;
-exports.getDb = getDb;
+module.exports = {
+    dbUrl: mongoAtlasDbUrl,
+    testDbUrl: mongoAtlasTestDbUrl,
+    getDb: getDb,
+};

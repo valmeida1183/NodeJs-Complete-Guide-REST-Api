@@ -53,6 +53,6 @@ exports.singin = async (req, res, next) => {
 
         res.status(200).json({ token, userId: loadedUser._id.toString() });
     } catch (error) {
-        errorHelper.handleError(error, next);
+        return errorHelper.handleError(error, next);
     }
 };

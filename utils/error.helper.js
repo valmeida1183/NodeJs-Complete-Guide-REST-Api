@@ -3,6 +3,7 @@ exports.handleError = (error, next, errorCode = 500) => {
         error.statusCode = errorCode;
     }
     next(error);
+    return error;
 };
 
 exports.throwError = (message, errorCode = 400, errorsArray = []) => {
